@@ -1,96 +1,112 @@
-playOptions = ['Rock','Paper','Scissors'];
-let win;
-let lose;
+let playerScore = 0;
+let computerScore = 0;
+
+const messageContainer = document.querySelector('.messageContainer');
+const scoreContainer = document.querySelector('.scoreContainer');
+const scores = document.querySelector('.scores');
+scores.textContent = (`Player score: ${playerScore} | Computer score: ${computerScore}`);
+
+
+
+// creates a nodelist of all buttons
+const buttons = document.querySelectorAll('button');
+// .forEach method to iterate through each button
+buttons.forEach((button) => {
+    // while iterating through a button, add a 'click' event listener
+    // on click, 
+    button.addEventListener('click', () => {
+        playRound(button.id);
+    });
+});
+
 /**
-* Function called computerPlay that will randomly return either
-* 'Rock', 'Paper', or 'Scissors'. This function will be used to
-* make the computer opponent select a play.
-*/
-function computerPlay(){
-    randomIndex = Math.floor(Math.random()*playOptions.length);
-    return playOptions[randomIndex].toLowerCase();
-}
-/**
- * Funciton called playerPlay that will promt the player to enter a play.
+ * Function that randomly selects rock, paper, or scissors
+ * and returns the that value.
  */
-function playerPlay(){
-    return prompt("Enter your play: ").toLowerCase();
-}
-/**
- * Function that plays a single round of Rock Paper Scissors.
- * The function should take two parmeters - playerSelection and
- * computerSelection - and then return a string that declares
- * the winner of the round like so: "You Lose! Paper beats Rock"
- */
-function playRound(playerSelection, computerSelection){
-     playerSelection = playerPlay();
-     computerSelection = computerPlay();
-
-     winMessage = `You win! ${playerSelection} beats ${computerSelection}`;
-     loseMessage = `You lose! ${computerSelection} beats ${playerSelection}`;
-
-
-
-     if(playerSelection == computerSelection){
-         console.log(`TIE! You both picked ${playerSelection}.`);
-     }
-     /*Player selects ROCK*/
-     else if(playerSelection == 'rock' && computerSelection == 'paper'){
-        console.log(loseMessage);
-        lose = true;
-     }
-     else if(playerSelection == 'rock' && computerSelection == 'scissors'){
-         console.log(winMessage);
-         win = true;
-     }
-     /*Player selects PAPER */
-     else if(playerSelection == 'paper' && computerSelection == 'rock'){
-         console.log(winMessage);
-         win = true;
-     }
-     else if(playerSelection == 'paper' && computerSelection == 'scissors'){
-         console.log(loseMessage);
-         lose = true;
-     }
-     /*Player selects SCISSORS*/
-     else if(playerSelection == 'scissors' && computerSelection == 'rock'){
-         console.log(loseMessage);
-         lose = true;
-     }
-     else if(playerSelection == 'scissors' && computerSelection == 'paper'){
-        console.log(winMessage);
-        win = true;
-     }
+function randomPlay(){
+    const choices = ['rock','paper','scissors'];
+    return choices[Math.floor(Math.random() * choices.length)];
 }
 
+
+
 /**
- * Function called game() that calls the playRound() funciton inside of it
- * to play a 5 round game. The function will keep track of score
- * and report a winner or loser at the end.
+ * Function that takes the players button click value and compares it to the computer selection.
+ * If the playerSelection and computerSelection are equal, return a tie message.
+ * If playerSelection beats computerSeleciton, playerScore increases by 1.
+ * If computerSelection beats playerSelection, computerScore increases by 1.
+ * At the end of the function, check both playerScore and computerScore.
+ * If playerScore or computerScore reaches 5, call winner() function.
  */
-function game(){
-    let playerScore = 0;
-    let computerScore = 0;
-    let winner = null;
-    for(let i = 0; i < 5; i++){
-        playRound()
-        if(Boolean(win)){
+function playRound(playerSelection){
+    let computerSelection = randomPlay();
+    // Player and computer TIE
+    if(playerSelection === computerSelection){
+        const para = document.createElement('p');
+        para.textContent = `TIE! You both selected ${playerSelection}`;
+        messageContainer.insertBefore(para, messageContainer.firstChild);
+    }
+    // Player beats computer
+    else if(
+        (playerSelection === 'rock' && computerSelection === 'scissors') ||
+        (playerSelection === 'paper' && computerSelection === 'rock') ||
+        (playerSelection === 'scissors' && computerSelection === 'paper')){
+            const message = document.createElement('p');
+            message.setAttribute('class','message');
+            message.textContent = `WIN! You selected ${playerSelection}, computer selected ${computerSelection}.`;
+            messageContainer.insertBefore(message,messageContainer.firstChild);
             playerScore++;
-        }
-        else if(Boolean(lose)){
+            
+    }
+    // Computer beats player
+    else if(
+        (playerSelection === 'rock' && computerSelection === 'paper') ||
+        (playerSelection === 'paper' && computerSelection === 'scissors') ||
+        (playerSelection === 'scissors' && computerSelection === 'rock')){
+            const message = document.createElement('p');
+            message.setAttribute('class','message');
+            message.textContent = `LOSE! You selected ${playerSelection}, computer selected ${computerSelection}.`;
+            messageContainer.insertBefore(message, messageContainer.firstChild);
             computerScore++;
-        }
+    }
+    
+    scores.textContent = (`Player score: ${playerScore} | Computer score: ${computerScore}`);
+    if(checkScore(playerScore, computerScore)){
+        document.getElementById("rock").disabled = true;
+        document.getElementById("paper").disabled = true;
+        document.getElementById("scissors").disabled = true;
+        const playAgain = document.createElement('button');
+        playAgain.setAttribute('type','button');
+        playAgain.textContent = 'Play again';
+        playAgain.addEventListener('click', reloadWindow);
+        messageContainer.insertBefore(playAgain, messageContainer.firstChild);
         if(playerScore > computerScore){
-            winner = 'The player';
-        }
-        else if(playerScore < computerScore){
-            winner = 'The computer';
+            const message = document.createElement('p');
+            message.setAttribute('class','message');
+            message.textContent = 'You defeat the computer! You won!'
+            messageContainer.insertBefore(message, messageContainer.firstChild);
         }
         else{
-            winner = 'Nobody';
+            const message = document.createElement('p');
+            message.setAttribute('class','message');
+            message.textContent = 'The computer beat you! You lost!'
+            messageContainer.insertBefore(message, messageContainer.firstChild);
         }
     }
-    console.log(`You won ${playerScore} times.
-        The computer won ${computerScore} times.
-        ${winner} wins!`);
+    else{
+        return;
+    }
+}
+
+function checkScore(playerScore, computerScore){
+    if(playerScore === 5 || computerScore === 5){
+        return true;
+    }
+    else{
+        return false;
+    }
+}
+
+function reloadWindow(){
+    location.reload();
 }
